@@ -2,7 +2,7 @@
 
 # Autor: Pedro Otávio
 # Email: pedr_ofs@hotmail.com
-# Atualizado: 22/02/2022
+# Atualizado: 01/03/2022
 
 # Este script tem por finalidade realizar o ataques ARP Spoofing em uma rede.
 
